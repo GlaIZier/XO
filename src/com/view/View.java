@@ -25,6 +25,8 @@ public class View implements ViewInterface {
 
     public static final String O = "O";
 
+    public static final String CANCEL_MOVE = "z";
+
     public final BufferedReader reader;
 
     private Game game;
@@ -164,8 +166,16 @@ public class View implements ViewInterface {
                     if ( answer == 1 ) {
                      continue;
                     }
-                     else if ( answer == 2 ) {
+                    else if ( answer == 2 ) {
                         return;
+                    }
+                    else if ( answer == 3) {
+                        System.out.println("Field after cancel:");
+                        if ( !controller.cancelMove() ) {
+                            System.out.println("Error during cancel!");
+                        }
+                        placed = false;
+                        continue;
                     }
                     placed = controller.figurePlaced(coordI, coordJ);
                  } while (!placed);
@@ -197,6 +207,14 @@ public class View implements ViewInterface {
                     }
                     else if ( answer == 2 ) {
                         return;
+                    }
+                    else if ( answer == 3) {
+                        System.out.println("Field after cancel:");
+                        if ( !controller.cancelMove() ) {
+                            System.out.println("Error during cancel!");
+                        }
+                        placed = false;
+                        continue;
                     }
                     placed = controller.figurePlaced(coordI, coordJ);
                 } while (!placed);
@@ -249,18 +267,26 @@ public class View implements ViewInterface {
     // 0 - OK
     // 1 - input row and column again
     // 2 - quit
+    // 3 - cancel last move
     private int humanInput() {
-        System.out.println("Input row:");
+        System.out.println("Input row. Press 'z' to cancel your last move (PvC game only).");
         if ( !tryInput() ) {
             return 2;  //
+        }
+        else if ( inString.equals(CANCEL_MOVE) ) {
+            return 3;
         }
         coordI = tryParse();
         if (coordI == -1) {
             return 1;
         }
-        System.out.println("Input column:");
+
+        System.out.println("Input column. Press 'z' to cancel your last move (PvC game only).");
         if ( !tryInput() ) {
             return 2;
+        }
+        else if ( inString.equals(CANCEL_MOVE) ) {
+            return 3;
         }
         coordJ = tryParse();
         if (coordJ == -1) {

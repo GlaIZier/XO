@@ -19,4 +19,5 @@ public interface ControllerInterface {
 
     char  getWinner();
 
+    boolean cancelMove();
 }

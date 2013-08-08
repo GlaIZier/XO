@@ -48,7 +48,8 @@ public class Field {
 
     public boolean setField(int coordI, int coordJ, char value) {
         if ( (coordI  >= MIN_COORD) && (coordI < fieldSize) && (coordJ  >= MIN_COORD) && (coordJ < fieldSize)
-              && field[coordI][coordJ] == DEFAULT_FIELD_VALUE ) {
+              && ( (field[coordI][coordJ] == DEFAULT_FIELD_VALUE) ||
+                 ( (field[coordI][coordJ] != DEFAULT_FIELD_VALUE) && (value == DEFAULT_FIELD_VALUE ) ) ) ) {   // for cancel move
             field[coordI][coordJ] = value;
             return true;
         }

@@ -47,4 +47,16 @@ public class Controller implements ControllerInterface {
         return game.getWinner();
     }
 
+    // cancel 2 moves
+    public boolean cancelMove() {
+        boolean moveWasCancelled = false;
+        int i = 0;
+        do {
+            moveWasCancelled = game.cancelMove();
+            i++;
+        } while ( (i < 2) && (moveWasCancelled) );
+        view.printField();
+        return moveWasCancelled;
+    }
+
 }

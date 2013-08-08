@@ -1,17 +1,13 @@
 package com.model;
 
-/**
- * Created with IntelliJ IDEA.
- * User: Кирилл
- * Date: 31.07.13
- * Time: 15:54
- * To change this template use File | Settings | File Templates.
- */
+import java.util.Stack;
 public class Game {
 
     private static final char DEFAULT_X = 'X';
 
     private static final char DEFAULT_O = 'O';
+
+    private static final char DEFAULT_FIELD_VALUE = ' ';
 
     private Field field;
 
@@ -21,6 +17,8 @@ public class Game {
 
     private Player computer;
 
+    private Stack prevMoves;
+
     // private Computer computer;
 
     public Game(int fieldSize) {
@@ -28,12 +26,7 @@ public class Game {
         countSteps = 0;
         field = new Field(fieldSize);
         computer = new Computer();
-    }
-
-    public Game(){
-        winner = ' ';
-        countSteps = 0;
-        field = new Field();
+        prevMoves = new Stack();
     }
 
     public Field getField() {
@@ -110,19 +103,22 @@ public class Game {
     }
 
     public boolean placeFigure(int coordI, int coordJ) {
+        boolean figurePlaced = false;
         if ( countSteps % 2 == 0) {
-           if ( field.setField(coordI, coordJ, DEFAULT_X) ) {
-               countSteps++;
-               return true;
-           }
+            figurePlaced = field.setField(coordI, coordJ, DEFAULT_X );
         }
         else {
-           if ( field.setField(coordI, coordJ, DEFAULT_O) ) {
-               countSteps++;
-               return true;
-           }
+            figurePlaced = field.setField(coordI, coordJ, DEFAULT_O );
         }
-        return false;
+        if (figurePlaced) {
+            countSteps++;
+            prevMoves.push(coordI);
+            prevMoves.push(coordJ);
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     public char getWinner() {
@@ -135,6 +131,21 @@ public class Game {
 
     public Player getComputer() {
         return computer;
+    }
+
+    public boolean cancelMove() {
+        if ( !prevMoves.empty() ) {
+            int coordJ = (Integer)prevMoves.pop();
+            int coordI = (Integer)prevMoves.pop();
+            boolean moveWasCancelled = field.setField(coordI, coordJ, DEFAULT_FIELD_VALUE);
+            if (moveWasCancelled) {
+                countSteps--;
+            }
+            return ( moveWasCancelled ) ;
+        }
+        else {
+            return false;
+        }
     }
 }
 
