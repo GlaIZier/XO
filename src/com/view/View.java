@@ -1,18 +1,15 @@
 package com.view;
 
+import com.model.Client;
 import com.model.Game;
-import com.сontroller.Controller;
-import java.io.*;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import com.model.ModelInterface;
+import com.model.Server;
+import com.сontroller.ControllerInterface;
 
-/**
- * Created with IntelliJ IDEA.
- * User: Кирилл
- * Date: 01.08.13
- * Time: 16:05
- * To change this template use File | Settings | File Templates.
- */
+import java.io.*;
+
+
+
 public class View implements ViewInterface {
 
     public static final String GREETING = "\n******New Game******\nThis is simple XO play. Please, choose field size > 2 and < 10! Input q to quit.";
@@ -29,9 +26,9 @@ public class View implements ViewInterface {
 
     public final BufferedReader reader;
 
-    private Game game;
+    private ModelInterface game;
 
-    private Controller controller;
+    private ControllerInterface controller;
 
     private String inString;
 
@@ -43,7 +40,7 @@ public class View implements ViewInterface {
 
     private Client client;
 
-    public View (Controller controller) {
+    public View (ControllerInterface controller) {
         this.controller = controller;
         coordI = 0;
         coordJ = 0;
@@ -51,14 +48,14 @@ public class View implements ViewInterface {
     }
 
     public void printField() {
-        for (int i = 0; i < game.getField().getFieldSize(); i++) {
+        for (int i = 0; i < game.getFieldSize(); i++) {
             printLine(i);
         }
     }
 
     public void printLine(int i) {
-        for (int j = 0; j < game.getField().getFieldSize(); j++) {
-            System.out.print("[" + game.getField().getField()[i][j] + "] ");
+        for (int j = 0; j < game.getFieldSize(); j++) {
+            System.out.print("[" + game.getField()[i][j] + "] ");
         }
         System.out.println("");
     }
@@ -72,12 +69,12 @@ public class View implements ViewInterface {
             }
             int answer = tryParse();
             if (answer != -1) {
-                controller.setGame( new Game(answer) );
-                game = controller.getGame();
+                game = new Game(answer);
+                controller.setGame(game);
             }
             else {
+                game = null;
                 controller.setGame(null);
-                game = controller.getGame();
                 continue;
             }
             printChooseGameMode();
@@ -97,14 +94,19 @@ public class View implements ViewInterface {
 
                     default:
                               System.out.println("You have inputted wrong number!");
+                              game = null;
                               controller.setGame(null);
-                              game = controller.getGame();
                               continue;
-
             }
+        } while (true);
 
-        } while (inString == inString);
+    }
 
+    public void printChooseGameMode() {
+        System.out.println("Choose the game mode:");
+        System.out.println("1 - PvP offline");
+        System.out.println("2 - PvP online");
+        System.out.println("3 - PvC");
     }
 
     public void pvpGameOffline() {
@@ -146,6 +148,112 @@ public class View implements ViewInterface {
         } while ( (answer <= -1) || (answer > 2) );
     }
 
+    public void serverPlay() {
+        server = new Server();
+        if ( (server.getClient() == null) || (server.getServerSocket() == null)) {
+            System.out.println("Error during establishing connection!");
+            return;
+        }
+        server.writeToOutputStream(game.getFieldSize());
+        int answer;
+        do {
+            boolean okCoords = false;
+            do {
+                answer = humanInput();
+                if ( answer == 1 ) {
+                    continue;
+                }
+                else if ( answer == 2 ) {
+                    server.closeSocket();
+                    server = null;
+                    return;
+                }
+                okCoords = controller.figurePlaced(coordI, coordJ); // server place X
+            } while (!okCoords);
+            server.writeToOutputStream(coordI);
+            server.writeToOutputStream(coordJ);
+            if (controller.getWinner() != ' ') {
+                break;
+            }
+
+            System.out.println("O goes to...");
+            coordI = server.getToInputStream();
+            coordJ = server.getToInputStream();
+            if ( (coordI != -1) && (coordJ != -1) ) {
+                controller.figurePlaced(coordI, coordJ); // client place O
+            }
+            else {
+                System.out.println("Network connection error!");
+                server.closeSocket();
+                server = null;
+                return;
+            }
+        }while ( controller.getWinner() == ' ' );
+        server.closeSocket();
+    }
+
+    public void clientPlay() {
+        System.out.println("Input server ip-address");
+        if (!tryInput()) {
+            return;
+        }
+        client = new Client(inString);
+        if ( client.getSocket() == null ) {
+            System.out.println("Can't connect to the server. It could be due to bad ip-address.");
+            return;
+        }
+        int in  = client.getToInputStream();
+        if ( in != -1) {
+            game = new Game(in);   // force new game to server field.
+            controller.setGame(game);
+        }
+        else {
+            System.out.println("Network connection error!");
+            client.closeSocket();
+            client = null;
+            return;
+        }
+
+        int answer;
+        do {
+            System.out.println("X goes to...");
+            coordI = client.getToInputStream();
+            coordJ = client.getToInputStream();
+            if ( (coordI != -1) && (coordJ != -1) ) {
+                controller.figurePlaced(coordI, coordJ); // server place X
+            }
+            else {
+                System.out.println("Network connection error!");
+                client.closeSocket();
+                client = null;
+                return;
+            }
+            if (controller.getWinner() != ' ') {
+                break;
+            }
+
+            boolean okCoords = false;
+            do {
+                answer = humanInput();
+                if ( answer == 1 ) {
+                    continue;
+                }
+                else if ( answer == 2 ) {
+                    client.closeSocket();
+                    client = null;
+                    System.out.println("Server session ended!");
+                    return;
+                }
+                okCoords = controller.figurePlaced(coordI, coordJ); // client place O
+            } while (!okCoords);
+            client.writeToOutputStream(coordI);
+            client.writeToOutputStream(coordJ);
+        } while ( controller.getWinner() == ' ' );
+
+        client.closeSocket();
+        System.out.println("Client session ended!");
+    }
+
     public void pvcGame() {
         System.out.println(RULE);
         printField();
@@ -157,76 +265,58 @@ public class View implements ViewInterface {
             }
         } while ( (!inString.equals(X) ) && (!inString.equals(O) ));
         humanFigure = inString;
-        int answer;
         if ( humanFigure.equals(X) ) {
-            boolean placed = false;
             do {
-                do {
-                    answer = humanInput();
-                    if ( answer == 1 ) {
-                     continue;
-                    }
-                    else if ( answer == 2 ) {
-                        return;
-                    }
-                    else if ( answer == 3) {
-                        System.out.println("Field after cancel:");
-                        if ( !controller.cancelMove() ) {
-                            System.out.println("Error during cancel!");
-                        }
-                        placed = false;
-                        continue;
-                    }
-                    placed = controller.figurePlaced(coordI, coordJ);
-                 } while (!placed);
-
+                if ( pvcHumanGoes() == 2) {
+                    return;
+                }
                 if (controller.getWinner() != ' ') {
                     break;
                 }
-
-                // here goes computer
-                System.out.println("Computer goes to...");
-                game.getComputer().makeStep(coordI, coordJ, game.getField().getFieldSize(), game.getField());
-                controller.figurePlaced(game.getComputer().getCoordI(), game.getComputer().getCoordJ());
+                pvcCompGoes();
             } while ( controller.getWinner() == ' ' );
         }
         else {
             do {
-                // here goes computer
-                System.out.println("Computer goes to...");
-                game.getComputer().makeStep(coordI, coordJ, game.getField().getFieldSize(), game.getField());
-                controller.figurePlaced(game.getComputer().getCoordI(), game.getComputer().getCoordJ());
+                pvcCompGoes();
                 if (controller.getWinner() != ' ') {
                     break;
                 }
-                boolean placed = false;
-                do {
-                    answer =  humanInput();
-                    if ( answer == 1 ) {
-                        continue;
-                    }
-                    else if ( answer == 2 ) {
-                        return;
-                    }
-                    else if ( answer == 3) {
-                        System.out.println("Field after cancel:");
-                        if ( !controller.cancelMove() ) {
-                            System.out.println("Error during cancel!");
-                        }
-                        placed = false;
-                        continue;
-                    }
-                    placed = controller.figurePlaced(coordI, coordJ);
-                } while (!placed);
+                if ( pvcHumanGoes() == 2) {
+                    return;
+                }
             }  while ( controller.getWinner() == ' ' );
         }
     }
 
-    public void printChooseGameMode() {
-        System.out.println("Choose the game mode:");
-        System.out.println("1 - PvP offline");
-        System.out.println("2 - PvP online");
-        System.out.println("3 - PvC");
+    private int pvcHumanGoes() {
+        boolean placed = false;
+        int answer;
+        do {
+            answer = humanInput();
+            if ( answer == 1 ) {
+                continue;
+            }
+            else if ( answer == 2 ) {
+                return 2;
+            }
+            else if ( answer == 3) {
+                System.out.println("Field after cancel:");
+                if ( !controller.cancelMove() ) {
+                    System.out.println("Error during cancel!");
+                }
+                placed = false;
+                continue;
+            }
+            placed = controller.figurePlaced(coordI, coordJ);
+        } while (!placed);
+        return 0;
+    }
+
+    private void pvcCompGoes() {
+        System.out.println("Computer goes to...");
+        game.makeComputerStep(coordI, coordJ, game.getFieldSize(), game.getInstanceField());
+        controller.figurePlaced(game.getComputer().getCoordI(), game.getComputer().getCoordJ());
     }
 
     // return false if user inputs 'q' or if there was input error
@@ -300,109 +390,16 @@ public class View implements ViewInterface {
     public void printWinner(char winner) {
         switch (winner) {
             case 'X':    System.out.println("**********X is win!**********");
-                         break;
+                break;
             case 'O':    System.out.println("**********O is win!**********");
-                         break;
+                break;
             case 'D':    System.out.println("***********Draw!************");
-                         break;
+                break;
             default:     System.out.println("Error occurred in printWinner method!");
         }
     }
 
     public void wrongCoords() {
         System.out.println("You  have chosen wrong coordinates!");
-    }
-
-    public void serverPlay() {
-        server = new Server();
-        try {
-            server.getClient().getOutputStream().write(game.getField().getFieldSize());
-            int answer;
-            do {
-                boolean okCoords = false;
-                do {
-                    answer = humanInput();
-                    if ( answer == 1 ) {
-                         continue;
-                    }
-                    else if ( answer == 2 ) {
-                        server.getClient().close();
-                        server.getServerSocket().close();
-                        server = null;
-                        System.out.println("Server session ended!");
-                        return;
-                     }
-                    okCoords = controller.figurePlaced(coordI, coordJ); // server place X
-                } while (!okCoords);
-                server.getClient().getOutputStream().write(coordI);
-                server.getClient().getOutputStream().write(coordJ);
-
-                if (controller.getWinner() != ' ') {
-                    break;
-                }
-                System.out.println("O goes to...");
-                coordI = server.getClient().getInputStream().read();
-                coordJ = server.getClient().getInputStream().read();
-                controller.figurePlaced(coordI, coordJ); // client place O
-            }while ( controller.getWinner() == ' ' );
-
-            server.getClient().close();
-            server.getServerSocket().close();
-            System.out.println("Server session ended!");
-        }
-        catch (UnknownHostException e) {
-            System.out.println("Error during sending message! " + e);
-        }
-        catch (IOException e) {
-            System.out.println("Server IO error! " + e);
-        }
-    }
-
-    public void clientPlay() {
-        System.out.println("Input server ip-address");
-        if (!tryInput()) {
-            return;
-        }
-        try {
-            client = new Client(InetAddress.getByName(inString));
-            int in  = client.getSocket().getInputStream().read();
-            controller.setGame( new Game(in) ); // force new game to server field.
-            game = controller.getGame();
-            int answer;
-            do {
-                System.out.println("X goes to...");
-                coordI = client.getSocket().getInputStream().read();
-                coordJ = client.getSocket().getInputStream().read();
-                controller.figurePlaced(coordI, coordJ); // server place X
-                if (controller.getWinner() != ' ') {
-                    break;
-                }
-                boolean okCoords = false;
-                do {
-                    answer = humanInput();
-                    if ( answer == 1 ) {
-                        continue;
-                    }
-                    else if ( answer == 2 ) {
-                        client.getSocket().close();
-                        client = null;
-                        System.out.println("Server session ended!");
-                        return;
-                    }
-                    okCoords = controller.figurePlaced(coordI, coordJ); // client place O
-                } while (!okCoords);
-                client.getSocket().getOutputStream().write(coordI);
-                client.getSocket().getOutputStream().write(coordJ);
-            } while ( controller.getWinner() == ' ' );
-
-            client.getSocket().close();
-            System.out.println("Client session ended!");
-        }
-        catch (UnknownHostException e) {
-            System.out.println("Error during client construction! " + e);
-        }
-        catch (IOException e) {
-            System.out.println("Client IO error! " + e);
-        }
     }
 }

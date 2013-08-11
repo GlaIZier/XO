@@ -1,12 +1,5 @@
 package com.model;
 
-/**
- * Created with IntelliJ IDEA.
- * User: Кирилл
- * Date: 01.08.13
- * Time: 13:45
- * To change this template use File | Settings | File Templates.
- */
 public class Field {
     private static final int DEFAULT_FIELD_SIZE = 3;
 
@@ -17,7 +10,6 @@ public class Field {
     private static final char DEFAULT_FIELD_VALUE = ' ';
 
     private static final int MIN_COORD = 0;
-
 
     private final int fieldSize;
 

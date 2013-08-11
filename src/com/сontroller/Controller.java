@@ -1,18 +1,12 @@
 package com.сontroller;
 
-import com.model.Game;
+import com.model.ModelInterface;
 import com.view.*;
 
-/**
- * Created with IntelliJ IDEA.
- * User: Mike
- * Date: 01.08.13
- * Time: 20:19
- * To change this template use File | Settings | File Templates.
- */
+
 public class Controller implements ControllerInterface {
 
-    private Game game;
+    private ModelInterface game;
 
     private ViewInterface view;
 
@@ -21,12 +15,8 @@ public class Controller implements ControllerInterface {
         view.play();
     }
 
-    public void setGame(Game game) {
+    public void setGame(ModelInterface game) {
         this.game = game;
-    }
-
-    public Game getGame() {
-        return game;
     }
 
     public boolean figurePlaced(int coordI, int coordJ) {

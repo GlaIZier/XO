@@ -1,7 +1,7 @@
 package com.model;
 
 import java.util.Stack;
-public class Game {
+public class Game implements ModelInterface{
 
     private static final char DEFAULT_X = 'X';
 
@@ -29,8 +29,16 @@ public class Game {
         prevMoves = new Stack();
     }
 
-    public Field getField() {
+    public char[][] getField() {
+        return field.getField();
+    }
+
+    public Field getInstanceField() {
         return field;
+    }
+
+    public int getFieldSize() {
+        return field.getFieldSize();
     }
 
     public boolean isGameEnds(int coordI, int coordJ) {
@@ -125,10 +133,6 @@ public class Game {
         return winner;
     }
 
-    public int getCountSteps() {
-        return countSteps;
-    }
-
     public Player getComputer() {
         return computer;
     }
@@ -146,6 +150,10 @@ public class Game {
         else {
             return false;
         }
+    }
+
+    public void makeComputerStep(int coordI, int coordJ, int fieldSize, Field field) {
+        computer.makeStep(coordI, coordJ, fieldSize, field);
     }
 }
 
