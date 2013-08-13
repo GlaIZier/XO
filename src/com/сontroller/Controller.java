@@ -1,5 +1,10 @@
 package com.сontroller;
 
+/*
+    Controller realize ControllerInterface.
+    It translate requests from view to model (game), when user do something with model (field eg): place figure
+    or cancel move
+ */
 import com.model.ModelInterface;
 import com.view.*;
 
@@ -32,9 +37,6 @@ public class Controller implements ControllerInterface {
             view.printField();
             return false;
         }
-    }
-    public char  getWinner() {
-        return game.getWinner();
     }
 
     // cancel 2 moves

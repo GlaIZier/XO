@@ -1,6 +1,12 @@
 package com.model;
 
+/*
+Game is model. It realizes ModelInterface.
+It contains all logic of the game and data (Field, search winner algorithms and etc.,
+provides all necessary methods to work with this data.
+ */
 import java.util.Stack;
+
 public class Game implements ModelInterface{
 
     private static final char DEFAULT_X = 'X';
@@ -8,6 +14,8 @@ public class Game implements ModelInterface{
     private static final char DEFAULT_O = 'O';
 
     private static final char DEFAULT_FIELD_VALUE = ' ';
+
+    private static final char DRAW = 'D';
 
     private Field field;
 
@@ -104,7 +112,7 @@ public class Game implements ModelInterface{
 
     public boolean isDraw() {
         if ( countSteps >= field.getFieldSize() * field.getFieldSize() ) {
-            winner = 'D'; // draw!
+            winner = DRAW; // draw!
             return true;
         }
         return false;

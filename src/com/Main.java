@@ -1,5 +1,8 @@
 package com;
-
+/*
+Simple console game XO
+It uses pattern MVC
+ */
 import com.сontroller.Controller;
 
 

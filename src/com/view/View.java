@@ -1,4 +1,11 @@
 package com.view;
+/*
+     View realizes Viewinterface, provides user interface.
+     It can appeal to model to know the state of field, print it, winner or something
+     When user wants to interract with model (for example place figure) it asks controller to do it
+
+ */
+
 
 import com.model.Client;
 import com.model.Game;
@@ -121,7 +128,7 @@ public class View implements ViewInterface {
                 break;
             }
             controller.figurePlaced(coordI, coordJ);
-        } while ( controller.getWinner() == ' ' );
+        } while ( game.getWinner() == ' ' );
 
     }
 
@@ -172,7 +179,7 @@ public class View implements ViewInterface {
             } while (!okCoords);
             server.writeToOutputStream(coordI);
             server.writeToOutputStream(coordJ);
-            if (controller.getWinner() != ' ') {
+            if (game.getWinner() != ' ') {
                 break;
             }
 
@@ -188,7 +195,7 @@ public class View implements ViewInterface {
                 server = null;
                 return;
             }
-        }while ( controller.getWinner() == ' ' );
+        }while ( game.getWinner() == ' ' );
         server.closeSocket();
     }
 
@@ -228,7 +235,7 @@ public class View implements ViewInterface {
                 client = null;
                 return;
             }
-            if (controller.getWinner() != ' ') {
+            if (game.getWinner() != ' ') {
                 break;
             }
 
@@ -248,7 +255,7 @@ public class View implements ViewInterface {
             } while (!okCoords);
             client.writeToOutputStream(coordI);
             client.writeToOutputStream(coordJ);
-        } while ( controller.getWinner() == ' ' );
+        } while ( game.getWinner() == ' ' );
 
         client.closeSocket();
         System.out.println("Client session ended!");
@@ -270,22 +277,22 @@ public class View implements ViewInterface {
                 if ( pvcHumanGoes() == 2) {
                     return;
                 }
-                if (controller.getWinner() != ' ') {
+                if (game.getWinner() != ' ') {
                     break;
                 }
                 pvcCompGoes();
-            } while ( controller.getWinner() == ' ' );
+            } while ( game.getWinner() == ' ' );
         }
         else {
             do {
                 pvcCompGoes();
-                if (controller.getWinner() != ' ') {
+                if (game.getWinner() != ' ') {
                     break;
                 }
                 if ( pvcHumanGoes() == 2) {
                     return;
                 }
-            }  while ( controller.getWinner() == ' ' );
+            }  while ( game.getWinner() == ' ' );
         }
     }
 

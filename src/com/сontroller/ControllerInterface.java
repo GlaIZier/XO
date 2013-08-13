@@ -9,7 +9,5 @@ public interface ControllerInterface {
 
     boolean figurePlaced(int coordI, int coordJ);
 
-    char  getWinner();
-
     boolean cancelMove();
 }
