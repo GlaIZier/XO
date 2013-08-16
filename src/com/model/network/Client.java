@@ -1,4 +1,4 @@
-package com.model;
+package com.model.network;
 
 import java.io.*;
 import java.net.*;

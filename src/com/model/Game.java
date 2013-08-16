@@ -5,6 +5,9 @@ Game is model. It realizes ModelInterface.
 It contains all logic of the game and data (Field, search winner algorithms and etc.,
 provides all necessary methods to work with this data.
  */
+import com.model.players.Computer;
+import com.model.players.Player;
+
 import java.util.Stack;
 
 public class Game implements ModelInterface{
@@ -62,16 +65,42 @@ public class Game implements ModelInterface{
     public boolean isWin(int coordI, int coordJ) {
 
         // horizontal
+        if ( isHorizWin(coordI, coordJ) ) {
+            return true;
+        }
+        // vertical
+        if ( isVertWin(coordI, coordJ) ) {
+            return true;
+        }
+        // diagonals
+
+        if ( isMainDiagWin(coordI, coordJ) ) {
+            return true;
+        }
+
+        if (isDiagWin(coordI, coordJ)) {
+            return true;
+        }
+
+        return false;
+
+    }
+
+    private boolean isHorizWin(int coordI, int coordJ) {
         int j = 1;
         while ( (j < field.getFieldSize()) && (field.getField()[coordI][j - 1] == field.getField()[coordI][j])  ) {
-              j++;
+            j++;
         }
         if (j == field.getFieldSize()) {
             winner = field.getField()[coordI][coordJ];
             return true;
         }
+        else {
+            return false;
+        }
+    }
 
-        // vertical
+    private boolean isVertWin(int coordI, int coordJ) {
         int i = 1;
         while ( (i < field.getFieldSize()) && (field.getField()[i - 1][coordJ] == field.getField()[i][coordJ]) ) {
             i++;
@@ -80,9 +109,15 @@ public class Game implements ModelInterface{
             winner = field.getField()[coordI][coordJ];
             return true;
         }
-        // diagonals
+        else {
+            return false;
+        }
+    }
+
+    private boolean isMainDiagWin(int coordI, int coordJ) {
+        int i = 1;
+        int j = 1;
         if (coordI == coordJ) {
-            i = j = 1;
             while ( (i < field.getFieldSize())&& (j < field.getFieldSize()) && (field.getField()[i - 1][j - 1] == field.getField()[i][j]) ) {
                 i++;
                 j++;
@@ -91,11 +126,19 @@ public class Game implements ModelInterface{
                 winner = field.getField()[coordI][coordJ];
                 return true;
             }
+            else {
+                return false;
+            }
         }
+        else {
+            return false;
+        }
+    }
 
+    private boolean isDiagWin(int coordI, int coordJ) {
+        int j = field.getFieldSize() - 2;
+        int i = 1;
         if (coordJ + coordI == field.getFieldSize() - 1) {
-            j = field.getFieldSize() - 2;
-            i = 1;
             while ( (i < field.getFieldSize()) && (j > Field.getMinCoord() - 1) && (field.getField()[i - 1][j + 1] == field.getField()[i][j]) ) {
                 i++;
                 j--;
@@ -104,10 +147,13 @@ public class Game implements ModelInterface{
                 winner = field.getField()[coordI][coordJ];
                 return true;
             }
+            else {
+                return false;
+            }
         }
-
-        return false;
-
+        else {
+            return false;
+        }
     }
 
     public boolean isDraw() {

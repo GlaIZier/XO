@@ -21,7 +21,7 @@ public class Field {
 
     public Field(int fieldSize) {
         if ( (fieldSize <= MIN_FIELD_SIZE)  || (fieldSize > MAX_FIELD_SIZE) ) {
-           this.fieldSize = DEFAULT_FIELD_SIZE;
+            this.fieldSize = DEFAULT_FIELD_SIZE;
         }
         else {
             this.fieldSize = fieldSize;

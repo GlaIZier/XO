@@ -1,5 +1,7 @@
 package com.model;
 
+import com.model.players.Player;
+
 public interface ModelInterface {
 
     char[][] getField();

@@ -7,10 +7,10 @@ package com.view;
  */
 
 
-import com.model.Client;
+import com.model.network.Client;
 import com.model.Game;
 import com.model.ModelInterface;
-import com.model.Server;
+import com.model.network.Server;
 import com.сontroller.ControllerInterface;
 
 import java.io.*;
@@ -300,6 +300,7 @@ public class View implements ViewInterface {
         boolean placed = false;
         int answer;
         do {
+            System.out.println("Press 'z' instead of coordinate to cancel your last move.");
             answer = humanInput();
             if ( answer == 1 ) {
                 continue;
@@ -330,24 +331,24 @@ public class View implements ViewInterface {
     private boolean tryInput() {
         try {
             inString = reader.readLine();
-            if (inString.equals(QUIT)) {
-                return false;
-            }
-            else {
-                if ( inString.equals("x") ) {
-                    inString = X;
-                }
-                else if ( inString.equals("o") ) {
-                    inString = O;
-                }
-                return true;
-            }
         }
         catch  (IOException e) {
             System.out.println("Input ERROR!");
             return false;
         }
-    }
+        if (inString.equals(QUIT)) {
+            return false;
+        }
+        else {
+            if ( inString.equals("x") ) {
+                    inString = X;
+                }
+                else if ( inString.equals("o") ) {
+                     inString = O;
+                }
+                return true;
+            }
+        }
 
     private int tryParse() {
         int answer;
@@ -366,7 +367,7 @@ public class View implements ViewInterface {
     // 2 - quit
     // 3 - cancel last move
     private int humanInput() {
-        System.out.println("Input row. Press 'z' to cancel your last move (PvC game only).");
+        System.out.println("Input row.");
         if ( !tryInput() ) {
             return 2;  //
         }
@@ -378,7 +379,7 @@ public class View implements ViewInterface {
             return 1;
         }
 
-        System.out.println("Input column. Press 'z' to cancel your last move (PvC game only).");
+        System.out.println("Input column.");
         if ( !tryInput() ) {
             return 2;
         }

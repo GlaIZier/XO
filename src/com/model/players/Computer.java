@@ -1,4 +1,6 @@
-package com.model;
+package com.model.players;
+
+import com.model.Field;
 
 public class Computer extends Player {
 
